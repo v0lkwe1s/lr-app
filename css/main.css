@@ -1,3 +1,11 @@
 p{
 	text-align : justify;
 }
+.carousel-control-next-icon {
+    background-color: #000;
+    opacity: 30%;
+ }
+ .carousel-control-prev-icon {
+    background-color: #000;
+    opacity: 30%;
+ }
