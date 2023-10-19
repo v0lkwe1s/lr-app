@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Consulta de Reciclagem no Google Maps</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3aaLchT5jq7fdnvlbn7qoJh2dq8IVGwQ&libraries=places"></script>
+    <script>
+                function getCoordinates() {
+            var cityName = document.getElementById("cityNameInput").value;
+            fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + cityName + '&key=AIzaSyB3aaLchT5jq7fdnvlbn7qoJh2dq8IVGwQ&libraries')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "OK") {
+                    var lat = data.results[0].geometry.location.lat;
+                    var lng = data.results[0].geometry.location.lng;
+                    document.getElementById("latitudeInput").innerText = lat;
+                    document.getElementById("longitudeInput").innerText = lng;
+                    document.getElementById("latitudeInput").value = lat;
+                    document.getElementById("longitudeInput").value = lng;
+                } else {
+                    alert("Não foi possível encontrar a cidade ou houve um erro na requisição.");
+                }
+            })
+            .catch(error => {
+                console.error('Houve um erro na requisição:', error);
+            });
+        }
+
+        function searchRecycling() {
+            var lat = parseFloat(document.getElementById("latitudeInput").value);
+            var lng = parseFloat(document.getElementById("longitudeInput").value);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                alert("Por favor, insira valores válidos de latitude e longitude.");
+                return;
+            }
+
+            var center = {lat: lat, lng: lng};
+
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: center,
+                zoom: 15
+            });
+
+            var query = document.getElementById("queryInput").value || "reciclagem";
+
+            var request = {
+                location: center,
+                radius: '500',
+                query: query
+            };
+
+            var service = new google.maps.places.PlacesService(map);
+            service.textSearch(request, function(results, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    for (var i = 0; i < results.length; i++) {
+                        var place = results[i];
+                        new google.maps.Marker({
+                            map: map,
+                            position: place.geometry.location
+                        });
+                    }
+                    map.setCenter(results[0].geometry.location);
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+
+    <input type="text" id="cityNameInput" placeholder="Digite o nome da cidade">
+    <button onclick="getCoordinates()">Buscar Coordenadas</button>
+
+    <p id="latitudeInput"></p>
+    <p id="longitudeInput"></p>
+
+    <input type="text" id="queryInput" placeholder="Digite a pesquisa (padrão: reciclagem)">
+    <button onclick="searchRecycling()">Pesquisar</button>
+    <div id="map" style="width: 100%; height: 500px;"></div>
+</body>
+</html>
